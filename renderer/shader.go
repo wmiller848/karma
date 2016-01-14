@@ -8,7 +8,13 @@ import (
 	"github.com/go-gl/gl/all-core/gl"
 )
 
-func createProgram(vertexShaderFile, fragmentShaderFile string) (uint32, error) {
+type Shader struct {
+	program    uint32
+	uniforms   map[string]int32
+	attributes map[string]uint32
+}
+
+func createProgram(vertexShaderFile, fragmentShaderFile string, uniforms, attributes []string) (*Shader, error) {
 
 	// Configure the vertex and fragment shaders
 	vertexShaderSource, err := ioutil.ReadFile(vertexShaderFile)
@@ -18,12 +24,12 @@ func createProgram(vertexShaderFile, fragmentShaderFile string) (uint32, error) 
 
 	vertexShader, err := compileShader(string(vertexShaderSource), gl.VERTEX_SHADER)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	fragmentShader, err := compileShader(string(fragmentShaderSource), gl.FRAGMENT_SHADER)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	program := gl.CreateProgram()
@@ -41,13 +47,34 @@ func createProgram(vertexShaderFile, fragmentShaderFile string) (uint32, error) 
 		log := strings.Repeat("\x00", int(logLength+1))
 		gl.GetProgramInfoLog(program, logLength, nil, gl.Str(log))
 
-		return 0, fmt.Errorf("failed to link program: %v", log)
+		return nil, fmt.Errorf("failed to link program: %v", log)
 	}
 
 	gl.DeleteShader(vertexShader)
 	gl.DeleteShader(fragmentShader)
 
-	return program, nil
+	gl.UseProgram(program)
+
+	programUniforms := make(map[string]int32)
+	for _, uniformName := range uniforms {
+		if uniformName != "" {
+			glstr := gl.Str(uniformName + "\x00")
+			programUniforms[uniformName] = gl.GetUniformLocation(program, glstr)
+		}
+	}
+
+	programAttributes := make(map[string]uint32)
+	for _, attribName := range attributes {
+		if attribName != "" {
+			glstr := gl.Str(attribName + "\x00")
+			programAttributes[attribName] = uint32(gl.GetAttribLocation(program, glstr))
+		}
+	}
+	return &Shader{
+		program:    program,
+		uniforms:   programUniforms,
+		attributes: programAttributes,
+	}, nil
 }
 
 func compileShader(source string, shaderType uint32) (uint32, error) {

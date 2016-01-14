@@ -19,7 +19,7 @@ func main() {
 	// GLFW event handling must run on the main OS thread
 	runtime.LockOSThread()
 
-	renderer.CreateRenderer(windowWidth, windowHeight)
-
+	r := renderer.CreateRenderer(windowWidth, windowHeight)
+	r.Render()
 	// fmt.Println("%+v", r)
 }
