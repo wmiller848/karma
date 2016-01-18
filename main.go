@@ -6,20 +6,39 @@
 package main
 
 import (
+	"fmt"
 	_ "image/png"
+	"os"
+	"os/signal"
 	"runtime"
+	"syscall"
 
+	"github.com/wmiller848/Karma/game"
 	"github.com/wmiller848/Karma/renderer"
 )
 
-const windowWidth = 800
-const windowHeight = 600
+// 	// 2560 x 1600
+const windowWidth = 2560 / 2
+const windowHeight = 1600 / 2
 
 func main() {
 	// GLFW event handling must run on the main OS thread
 	runtime.LockOSThread()
 
+	sigs := make(chan os.Signal, 1)
+
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	r := renderer.CreateRenderer(windowWidth, windowHeight)
-	r.Render()
+	r.SetCamera(windowWidth, windowHeight)
+	// r.Render()
+	g := game.CreateGame(r)
+	g.LoadLevel()
+	go func() {
+		sig := <-sigs
+		fmt.Println(sig)
+		g.Pause()
+	}()
+	g.Play()
+	fmt.Println(g)
 	// fmt.Println("%+v", r)
 }
