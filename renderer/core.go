@@ -24,6 +24,10 @@ type Renderer struct {
 	Fps          int
 }
 
+func testCallback(w *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
+	fmt.Println("Callback")
+}
+
 func CreateRenderer(windowWidth, windowHeight int) *Renderer {
 
 	if err := glfw.Init(); err != nil {
@@ -45,6 +49,7 @@ func CreateRenderer(windowWidth, windowHeight int) *Renderer {
 		panic(err)
 	}
 	window.MakeContextCurrent()
+	window.SetKeyCallback(testCallback)
 
 	// Initialize Glow
 	if err := gl.Init(); err != nil {

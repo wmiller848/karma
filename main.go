@@ -18,8 +18,12 @@ import (
 )
 
 // 	// 2560 x 1600
-const windowWidth = 2560 / 2
-const windowHeight = 1600 / 2
+// const windowWidth = 2560 / 2
+// const windowHeight = 1600 / 2
+
+// // 2880 x 1800
+const windowWidth = 2880 / 2
+const windowHeight = 1800 / 2
 
 func main() {
 	// GLFW event handling must run on the main OS thread
